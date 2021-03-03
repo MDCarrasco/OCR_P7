@@ -47,15 +47,35 @@ class Wallet:
             max_budget Default to 500
         """
         self.name = name
+        self.shares = []
+        self.amount_spent = 0
         self.total_profit = total_profit
         self.max_budget = max_budget
 
-    def __str__(self) -> str:
+    def __str__(self):
         """Summary of __str__.
 
         Returns:
             str: string presentation
         """
-        return ('\nName: {}\nTotal profit after 2 years (Euro): {}\n'
+        share_str = ''
+        for share in self.shares:
+            share_str += '{}'.format(str(share))
+        return ('\nName: {}\nShares: {}\n'
+                '\nTotal profit after 2 years (Euro): {}\n'
                 '\nMaximum budget (Euro): {}\n'
-                .format(self.name, self.total_profit, self.max_budget))
+                .format(self.name, share_str, self.total_profit, self.max_budget))
+
+    def buy_shares(self, share, qty):
+        """Summary of buy_shares.
+
+        Args:
+            name
+            qty
+        """
+        for _ in range(qty):
+            if (self.amount_spent + share.price) <= self.max_budget:
+                self.amount_spent += share.price
+                self.shares.append(share)
+            else:
+                print('You have exceeded the maximum budget for your wallet\n')

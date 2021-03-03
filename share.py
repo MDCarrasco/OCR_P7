@@ -39,7 +39,7 @@ __status__ = "Dev"
 class Share:
     """Share.
     """
-    def __init__(self, name, profit_percentage, profit_amount):
+    def __init__(self, name, price, profit_percentage):
         """Summary of __init__.
 
         Args:
@@ -48,15 +48,17 @@ class Share:
             profit_amount
         """
         self.name = name
+        self.price = price
         self.profit_percentage = profit_percentage
-        self.profit_amount = profit_amount
+        self.profit_amount = (self.profit_percentage / 100) * price
 
-    def __str__(self) -> str:
+    def __str__(self):
         """Summary of __str__.
 
         Returns:
             str: string presentation
         """
-        return ('\nName: {}\nProfit percentage after 2 years: {}\n'
+        return ('\nName: {}\nPrice {}\nProfit percentage after 2 years: {}\n'
                 '\nProfit amount after 2 years (Euro): {}\n'
-                .format(self.name, self.profit_percentage, self.profit_amount))
+                .format(self.name, self.price, self.profit_percentage,
+                        self.profit_amount))

@@ -63,6 +63,5 @@ def bruteforce():
     shares.append(Share('Share-19', 12, 21))
     shares.append(Share('Share-20', 57, 18))
 
-    for share in shares:
-
-
+    my_wallet.buy_shares(shares[0], 2)
+    print(my_wallet)
