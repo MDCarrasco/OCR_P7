@@ -35,4 +35,5 @@ __maintainer__ = "Michael Carrasco"
 __email__ = "<michaeldanielcarrasco@gmail.com>"
 __status__ = "Dev"
 
+def bruteforce():
 
