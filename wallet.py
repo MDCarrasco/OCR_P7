@@ -1,10 +1,10 @@
-# share.py
-# Created at: Wed Mar 03 2021 15:45:08 GMT+0100 (Central European Standard Time)
+# wallet.py
+# Created at: Wed Mar 03 2021 16:09:41 GMT+0100 (Central European Standard Time)
 # Copyright 2021 MDCarrasco <michaeldanielcarrasco@gmail.com>
 #
 
 """
-share.py
+wallet.py
 INSERT docstring paragraph
 
 Example:
@@ -36,20 +36,19 @@ __email__ = "<michaeldanielcarrasco@gmail.com>"
 __status__ = "Dev"
 
 # pylint: disable=too-few-public-methods
-class Share:
-    """Share.
+class Wallet:
+    """Wallet.
     """
-    def __init__(self, name, profit_percentage, profit_amount):
+    def __init__(self, name, total_profit=0, max_budget=500):
         """Summary of __init__.
 
         Args:
-            name
-            profit_percentage
-            profit_amount
+            total_profit
+            max_budget Default to 500
         """
         self.name = name
-        self.profit_percentage = profit_percentage
-        self.profit_amount = profit_amount
+        self.total_profit = total_profit
+        self.max_budget = max_budget
 
     def __str__(self) -> str:
         """Summary of __str__.
@@ -57,6 +56,6 @@ class Share:
         Returns:
             str: string presentation
         """
-        return ('\nName: {}\nProfit percentage after 2 years: {}\n'
-                '\nProfit amount after 2 years (Euro): {}\n'
-                .format(self.name, self.profit_percentage, self.profit_amount))
+        return ('\nName: {}\nTotal profit after 2 years (Euro): {}\n'
+                '\nMaximum budget (Euro): {}\n'
+                .format(self.name, self.total_profit, self.max_budget))
