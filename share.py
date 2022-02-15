@@ -27,7 +27,7 @@ http://google.github.io/styleguide/pyguide.html
 # Owned
 
 __author__ = "Michael Carrasco"
-__copyright__ = "2021 MDCarrasco <michaeldanielcarrasco@gmail.com>"
+__copyright__ = "2022 MDCarrasco <michaeldanielcarrasco@gmail.com>"
 __credits__ = ["Michael Carrasco"]
 __license__ = ""
 __version__ = "0.0.1"
@@ -35,11 +35,12 @@ __maintainer__ = "Michael Carrasco"
 __email__ = "<michaeldanielcarrasco@gmail.com>"
 __status__ = "Dev"
 
+
 # pylint: disable=too-few-public-methods
-class Share:
+class Share(object):
     """Share.
     """
-    def __init__(self, name, price, profit_percentage):
+    def __init__(self, name, price, profit_percentage, profit_amount=None):
         """Summary of __init__.
 
         Args:
@@ -48,9 +49,11 @@ class Share:
             profit_amount
         """
         self.name = name
-        self.price = price
-        self.profit_percentage = profit_percentage
-        self.profit_amount = (self.profit_percentage / 100) * price
+        self.price = float(price)
+        self.profit_percentage = float(profit_percentage)
+        self.profit_amount = profit_amount
+        if not self.profit_amount:
+            self.profit_amount = round(((self.profit_percentage / 100) * self.price), 2)
 
     def __str__(self):
         """Summary of __str__.
@@ -58,7 +61,10 @@ class Share:
         Returns:
             str: string presentation
         """
-        return ('\nName: {}\nPrice {}\nProfit percentage after 2 years: {}\n'
-                '\nProfit amount after 2 years (Euro): {}\n'
-                .format(self.name, self.price, self.profit_percentage,
-                        self.profit_amount))
+        return (f"\n\t\tName: {self.name}\n"
+                f"\t\tPrice {self.price}\n"
+                f"\t\tProfit percentage after 2 years: {self.profit_percentage}\n"
+                f"\t\tProfit amount after 2 years (USD): {self.profit_amount}\n")
+
+    def __repr__(self):
+        return self.__str__()

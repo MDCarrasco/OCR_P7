@@ -21,13 +21,16 @@ http://google.github.io/styleguide/pyguide.html
 # Futures
 
 # Generic/Built-in
+from itertools import combinations
+from operator import itemgetter
 
 # Other Libs
 
 # Owned
+from share import Share
 
 __author__ = "Michael Carrasco"
-__copyright__ = "2021 MDCarrasco <michaeldanielcarrasco@gmail.com>"
+__copyright__ = "2022 MDCarrasco <michaeldanielcarrasco@gmail.com>"
 __credits__ = ["Michael Carrasco"]
 __license__ = ""
 __version__ = "0.0.1"
@@ -35,47 +38,57 @@ __maintainer__ = "Michael Carrasco"
 __email__ = "<michaeldanielcarrasco@gmail.com>"
 __status__ = "Dev"
 
+
 # pylint: disable=too-few-public-methods
-class Wallet:
+class Wallet(object):
     """Wallet.
     """
-    def __init__(self, name, total_profit=0, max_budget=500):
+    def __init__(self, name, max_budget=500):
         """Summary of __init__.
 
         Args:
-            total_profit
+            name
             max_budget Default to 500
         """
         self.name = name
-        self.shares = []
-        self.amount_spent = 0
-        self.total_profit = total_profit
         self.max_budget = max_budget
+        self._combinations = {}
 
-    def __str__(self):
-        """Summary of __str__.
+    def get_best_combination(self):
+        best_total_profit_and_combination = 0, None, None
+        previous_total_profit_and_combination = 0, None, None
+        for combination_name, combination_shares in self._combinations.items():
+            current_total_profit_and_combination = self._get_total_profit_and_combination(combination_name, combination_shares)
+            comparison_table = [current_total_profit_and_combination, previous_total_profit_and_combination]
+            best_total_profit_and_combination = max(comparison_table, key=itemgetter(0))
+            previous_total_profit_and_combination = current_total_profit_and_combination
 
-        Returns:
-            str: string presentation
-        """
-        share_str = ''
-        for share in self.shares:
-            share_str += '{}'.format(str(share))
-        return ('\nName: {}\nShares: {}\n'
-                '\nTotal profit after 2 years (Euro): {}\n'
-                '\nMaximum budget (Euro): {}\n'
-                .format(self.name, share_str, self.total_profit, self.max_budget))
+        return best_total_profit_and_combination
 
-    def buy_shares(self, share, qty):
-        """Summary of buy_shares.
+    @staticmethod
+    def _get_total_profit_and_combination(combination_name, combination_shares):
+        total_profit = 0
+        for share in combination_shares:
+            total_profit += share.profit_amount
 
-        Args:
-            name
-            qty
-        """
-        for _ in range(qty):
-            if (self.amount_spent + share.price) <= self.max_budget:
-                self.amount_spent += share.price
-                self.shares.append(share)
-            else:
-                print('You have exceeded the maximum budget for your wallet\n')
+        return round(total_profit, 2), combination_name, combination_shares
+
+    def get_combinations(self):
+        return self._combinations
+
+    def set_combinations(self, available_shares):
+        # this contains all possible combinations of shares from min bugdet (4 dollars) to 500 dollars budget
+        for r in range(len(available_shares) + 1):
+            combinations_object = combinations(available_shares, r)
+            combinations_lst = list(combinations_object)
+            i = 1
+            for combination in combinations_lst:
+                combination_name = f"Combination-{i}"
+                shares_combination = []
+                total_combination_cost = 0
+                for share_obj in combination:
+                    total_combination_cost += share_obj.price
+                    shares_combination.append(share_obj)
+                    i += 1
+                if not total_combination_cost > self.max_budget:
+                    self._combinations[f"{combination_name}"] = shares_combination
