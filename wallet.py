@@ -21,8 +21,7 @@ http://google.github.io/styleguide/pyguide.html
 # Futures
 
 # Generic/Built-in
-from itertools import combinations
-from operator import itemgetter
+from collections import defaultdict
 
 # Other Libs
 
@@ -50,45 +49,37 @@ class Wallet(object):
             name
             max_budget Default to 500
         """
-        self.name = name
-        self.max_budget = max_budget
-        self._combinations = {}
+        self.name                   = name
+        self.max_budget             = max_budget
+        self._total_quantity_bought = 0
+        self._total_cost            = 0
+        self._total_profit          = 0
+        self._folder                = defaultdict(float)
 
-    def get_best_combination(self):
-        best_total_profit_and_combination = 0, None, None
-        previous_total_profit_and_combination = 0, None, None
-        for combination_name, combination_shares in self._combinations.items():
-            current_total_profit_and_combination = self._get_total_profit_and_combination(combination_name, combination_shares)
-            comparison_table = [current_total_profit_and_combination, previous_total_profit_and_combination]
-            best_total_profit_and_combination = max(comparison_table, key=itemgetter(0))
-            previous_total_profit_and_combination = current_total_profit_and_combination
+    def get_total_profit(self):
+        return round(self._total_profit, 2)
 
-        return best_total_profit_and_combination
+    def get_folder(self):
+        return self._folder
 
-    @staticmethod
-    def _get_total_profit_and_combination(combination_name, combination_shares):
-        total_profit = 0
-        for share in combination_shares:
-            total_profit += share.profit_amount
+    def set_total_quantity_bought(self, quantity):
+        self._total_quantity_bought = quantity
 
-        return round(total_profit, 2), combination_name, combination_shares
+    def update_total_quantity_bought(self, quantity):
+        self._total_quantity_bought += quantity
 
-    def get_combinations(self):
-        return self._combinations
+    def get_total_quantity_bought(self):
+        return self._total_quantity_bought
 
-    def set_combinations(self, available_shares):
-        # this contains all possible combinations of shares from min bugdet (4 dollars) to 500 dollars budget
-        for r in range(len(available_shares) + 1):
-            combinations_object = combinations(available_shares, r)
-            combinations_lst = list(combinations_object)
-            i = 1
-            for combination in combinations_lst:
-                combination_name = f"Combination-{i}"
-                shares_combination = []
-                total_combination_cost = 0
-                for share_obj in combination:
-                    total_combination_cost += share_obj.price
-                    shares_combination.append(share_obj)
-                    i += 1
-                if not total_combination_cost > self.max_budget:
-                    self._combinations[f"{combination_name}"] = shares_combination
+    def get_total_cost(self):
+        return self._total_cost
+
+    def buy_share(self, share, quantity):
+        self._folder[share.name] = quantity
+        self.max_budget = self.max_budget % share.price
+        self._total_cost += quantity * share.price
+        self._total_profit += quantity * share.profit_amount
+
+    def prepare_folder_for_optimized(self):
+        for index in range(self.max_budget + 1):
+            self._folder[str(index)] = 0

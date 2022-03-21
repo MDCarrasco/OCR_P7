@@ -39,7 +39,7 @@ __status__ = "Dev"
 
 
 # pylint: disable=too-few-public-methods
-class ShareParser(object):
+class SharesParser(object):
     def __init__(self):
         self._file = None
         self._reader = None
@@ -53,13 +53,13 @@ class ShareParser(object):
         next(self._reader)
 
     def import_file(self, file_path) -> list:
-        share_lst = []
+        shares = []
         self._reset_parser(file_path)
         for row in self._reader:
             new_share = Share(row[0], row[1], row[2])
-            share_lst.append(new_share)
+            shares.append(new_share)
 
-        return share_lst
+        return shares
 
 
 
