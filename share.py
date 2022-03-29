@@ -53,12 +53,6 @@ class Share(object):
         # value
         self.profit_amount = round((self.profit_percentage / 100) * self.price, 2)
 
-    def _verbose_str(self):
-        return (f"\n\t\tName: {self.name}\n"
-                f"\t\tPrice: {self.price}\n"
-                f"\t\tProfit percentage after 2 years: {self.profit_percentage}\n"
-                f"\t\tProfit amount after 2 years (USD): {self.profit_amount}\n")
-
     def __str__(self):
         """Summary of __str__.
 
