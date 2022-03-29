@@ -51,27 +51,37 @@ def optimized(wallet, available_shares):
 
     for share_idx in range(share_count):
         for budget in range(budget_count):
+
             if share_idx == 0 or budget == 0:
-                wallet.table[share_idx][budget] = 0
-            elif available_shares[share_idx - 1].price <= budget:
+                continue
+
+            considered_share = available_shares[share_idx - 1]
+            prev_made_profit = wallet.table[share_idx - 1]
+
+            if considered_share.price <= budget:
+                new_budget = budget - considered_share.price
                 wallet.table[share_idx][budget] = max(
-                    round(available_shares[share_idx - 1].profit_amount + wallet.table[share_idx - 1][budget - available_shares[share_idx - 1].price], 2),
-                    wallet.table[share_idx - 1][budget]
+                    round(considered_share.profit_amount + prev_made_profit[new_budget], 2),
+                    prev_made_profit[budget]
                 )
             else:
-                wallet.table[share_idx][budget] = wallet.table[share_idx - 1][budget]
-    profit = wallet.table[share_count - 1][budget_count - 1]
+                wallet.table[share_idx][budget] = prev_made_profit[budget]
 
+    profit = wallet.table[share_count - 1][budget_count - 1]
     budget = wallet.max_budget
     for share_idx in range(share_count, 0, -1):
+        prev_made_profit = wallet.table[share_idx - 1]
+
         if profit <= 0:
             break
-        if profit == wallet.table[share_idx - 1][budget]:
+
+        if profit == prev_made_profit[budget]:
             continue
         else:
-            wallet.buy_share(available_shares[share_idx - 1])
-            profit = round(profit - available_shares[share_idx - 1].profit_amount, 2)
-            budget = budget - available_shares[share_idx - 1].price
+            considered_share = available_shares[share_idx - 1]
+            wallet.buy_share(considered_share)
+            profit = round(profit - considered_share.profit_amount, 2)
+            budget = budget - considered_share.price
 
 
 def get_args():
