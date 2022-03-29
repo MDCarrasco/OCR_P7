@@ -40,23 +40,18 @@ __status__ = "Dev"
 class Share(object):
     """Share.
     """
-    def __init__(self, name, price, profit_percentage, profit_amount=None):
-        """Summary of __init__.
-
-        Args:
-            name
-            profit_percentage
-            profit_amount
+    def __init__(self, name, price, profit_percentage, cents=False):
+        """Summary of __init__
         """
+        self.cents = cents
         # name
         self.name = name
-        # weight
-        self.price = float(price)
+        # profit_percentage
         self.profit_percentage = float(profit_percentage)
+        # weight
+        self.price = float(price) if not cents else int(float(price) * 100)
         # value
-        self.profit_amount = profit_amount
-        if not self.profit_amount:
-            self.profit_amount = round(((self.profit_percentage / 100) * self.price), 2)
+        self.profit_amount = round((self.profit_percentage / 100) * self.price, 2)
 
     def _verbose_str(self):
         return (f"\n\t\tName: {self.name}\n"
@@ -70,7 +65,8 @@ class Share(object):
         Returns:
             str: string representation
         """
-        return f"({self.name}, {self.price}, {self.profit_percentage})"
+        unit = "cents" if self.cents else "euros"
+        return f"({self.name}, {self.price} {unit}, {self.profit_percentage}% ({self.profit_amount} {unit}))"
 
     def __repr__(self):
         return self.__str__()

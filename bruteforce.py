@@ -26,8 +26,8 @@ import argparse
 # Other Libs
 
 # Owned
-from wallet import Wallet
 from share_parser import SharesParser
+from wallet import Wallet
 
 __author__ = "Michael Carrasco"
 __copyright__ = "2022 MDCarrasco <michaeldanielcarrasco@gmail.com>"
@@ -39,61 +39,36 @@ __email__ = "<michaeldanielcarrasco@gmail.com>"
 __status__ = "Dev"
 
 
+def bruteforce(wallet, available_shares):
+    """
+    Subset count is 2**len(available_shares) since a share can only either be bought or not bought
+    """
+
+    # 1- First task is to find all subsets for a given list of shares
+    subsets = [[]]
+    for available_share in available_shares:
+        subsets += [subset + [available_share] for subset in subsets]
+    assert len(subsets) == 2**len(available_shares)
+
+    # 2- Then we remove all subsets that are too expensive (greater than wallet.max_budget)
+    subsets = [subset for subset in subsets if sum(share.price for share in subset) <= wallet.max_budget]
+
+    # 3- Then we just have to pick the subset with the best total profit
+    best_subset = max(subsets, key=lambda subset: sum(share.profit_amount for share in subset))
+    wallet.buy_single_shares(best_subset)
+
+
 def get_args():
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("--data", required=True)
     return argument_parser.parse_args()
 
 
-def bruteforce(data_name):
-    """bruteforce.
-    """
-    my_wallet = Wallet('my_wallet')
-    sp = SharesParser()
-    available_shares = sp.import_file(f"./data/{data_name}.csv")
-    sorted_available_shares_dantzig = sorted(available_shares, key=lambda share: share.profit_amount/share.price, reverse=True)
-    print("AlgoTrading bought:")
-    for available_share in sorted_available_shares_dantzig:
-        share_quantity = (my_wallet.max_budget - my_wallet.max_budget % available_share.price) / available_share.price
-        my_wallet.update_total_quantity_bought(share_quantity)
-        print(f"Share: {available_share.name}, Quantity: {share_quantity}")
-        my_wallet.buy_share(available_share, share_quantity)
-
-    print("\nTotal cost:", my_wallet.get_total_cost())
-    print("Total return:", my_wallet.get_total_profit())
-
-
-def optimized(data_name):
-    my_wallet = Wallet('my_wallet')
-    sp = SharesParser()
-    available_shares = sp.import_file(f"./data/{data_name}.csv")
-    my_wallet.prepare_folder_for_optimized()
-    folder = my_wallet.get_folder()
-    max_budget_in_cts = my_wallet.max_budget * 100
-    current_max_budget = 0
-    while True:
-        current_max_budget_in_cts = current_max_budget * 100
-        if current_max_budget_in_cts >= max_budget_in_cts:
-            break
-        print(current_max_budget)
-        print(current_max_budget_in_cts)
-        for available_share in available_shares:
-            available_share_price_in_cts = available_share.price * 100
-            available_profit_amount_in_cts = available_share.profit_amount * 100
-            if available_share_price_in_cts < current_max_budget_in_cts:
-                folder[str(current_max_budget_in_cts)] = max(
-                    folder[str(current_max_budget_in_cts)],
-                    folder[str(current_max_budget_in_cts - available_share_price_in_cts)] + available_profit_amount_in_cts
-                )
-                print(current_max_budget_in_cts, folder[str(current_max_budget_in_cts)])
-                break
-        current_max_budget += 1
-
-    result = round(folder[str(max_budget_in_cts)], 2)
-    print(f"Optimized algo total return: {result}")
-
-
 if __name__ == "__main__":
     args = get_args()
-    bruteforce(args.data)
-    optimized(args.data)
+    share_parser = SharesParser()
+
+    shares    = share_parser.get_shares_from_file(f"./data/{args.data}.csv")
+    my_wallet = Wallet('my_wallet')
+    bruteforce(my_wallet, shares)
+    print(my_wallet)

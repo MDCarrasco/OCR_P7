@@ -22,11 +22,11 @@ http://google.github.io/styleguide/pyguide.html
 
 # Generic/Built-in
 from collections import defaultdict
+from decimal import Decimal, ROUND_DOWN
 
 # Other Libs
 
 # Owned
-from share import Share
 
 __author__ = "Michael Carrasco"
 __copyright__ = "2022 MDCarrasco <michaeldanielcarrasco@gmail.com>"
@@ -42,44 +42,55 @@ __status__ = "Dev"
 class Wallet(object):
     """Wallet.
     """
-    def __init__(self, name, max_budget=500):
+    def __init__(self, name, max_budget=500, optimized=False, nb_available_shares=None):
         """Summary of __init__.
 
         Args:
             name
             max_budget Default to 500
         """
-        self.name                   = name
-        self.max_budget             = max_budget
-        self._total_quantity_bought = 0
-        self._total_cost            = 0
-        self._total_profit          = 0
-        self._folder                = defaultdict(float)
+        if optimized:
+            assert nb_available_shares is not None
+        self.name                  = name
+        self.current_budget        = max_budget
+        self.max_budget            = max_budget if not optimized else max_budget * 100
+        self.total_quantity_bought = 0
+        self.total_cost            = 0
+        self.total_profit          = 0
+        self.table                 = None if not optimized else self.__build_table(nb_available_shares)
+        self.folder                = defaultdict(int)
+        self.optimized             = optimized
 
-    def get_total_profit(self):
-        return round(self._total_profit, 2)
+    def __build_table(self, nb_available_shares):
+        return [[0 for _ in range(self.max_budget + 1)] for _ in range(nb_available_shares + 1)]
 
-    def get_folder(self):
-        return self._folder
+    def _buy_share(self, share_name, share_price, share_profit_amount):
+        self.folder[share_name] = share_price
+        self.current_budget     = float(Decimal(str(self.current_budget)) - Decimal(str(share_price)))
+        self.total_cost         = float(Decimal(str(self.total_cost)) + Decimal(str(share_price)))
+        self.total_profit       = float(Decimal(str(self.total_profit)) + Decimal(str(share_profit_amount)))
 
-    def set_total_quantity_bought(self, quantity):
-        self._total_quantity_bought = quantity
+    def buy_share(self, share):
+        if self.optimized:
+            self._buy_share(share.name, round(share.price / 100, 2), round(share.profit_amount / 100, 2))
+        else:
+            self._buy_share(share.name, share.price, share.profit_amount)
+        self.total_quantity_bought += 1
 
-    def update_total_quantity_bought(self, quantity):
-        self._total_quantity_bought += quantity
+    def buy_single_shares(self, combination):
+        assert sum(share.price for share in combination) <= self.max_budget
+        for share in combination:
+            self.buy_share(share)
 
-    def get_total_quantity_bought(self):
-        return self._total_quantity_bought
+    def __str__(self):
+        share_names_and_prices = ""
+        for share_name, share_price in self.folder.items():
+            share_names_and_prices += f"{share_name} {share_price}\n"
+        total_cost   = f"{round(self.total_cost, 2)}\n"
+        total_profit = f"{round(self.total_profit, 2)}\n"
+        return f"AlgoInvest&Trade bought:\n"\
+               f"{share_names_and_prices}" \
+               f"Total cost: {total_cost}" \
+               f"Total return: {total_profit}"
 
-    def get_total_cost(self):
-        return self._total_cost
 
-    def buy_share(self, share, quantity):
-        self._folder[share.name] = quantity
-        self.max_budget = self.max_budget % share.price
-        self._total_cost += quantity * share.price
-        self._total_profit += quantity * share.profit_amount
-
-    def prepare_folder_for_optimized(self):
-        for index in range(self.max_budget + 1):
-            self._folder[str(index)] = 0

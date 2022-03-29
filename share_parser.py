@@ -22,6 +22,7 @@ http://google.github.io/styleguide/pyguide.html
 
 # Generic/Built-in
 import csv
+from collections import Counter
 
 # Other Libs
 
@@ -52,13 +53,24 @@ class SharesParser(object):
         # skips header line
         next(self._reader)
 
-    def import_file(self, file_path) -> list:
-        shares = []
+    @staticmethod
+    def _should_parse_row(row):
+        if float(row[1]) <= 0.0 or float(row[2]) <= 0.0:
+            return False
+        return True
+
+    def get_shares_from_file(self, file_path, cents=False) -> list:
+        shares      = []
+        share_names = []
         self._reset_parser(file_path)
         for row in self._reader:
-            new_share = Share(row[0], row[1], row[2])
-            shares.append(new_share)
+            if self._should_parse_row(row):
+                share_names.append(row[0])
+                new_share = Share(row[0], row[1], row[2], cents)
+                shares.append(new_share)
 
+        share_names_to_keep = [share_name for share_name, count in Counter(share_names).items() if count == 1]
+        shares = [share for share in shares if share.name in share_names_to_keep]
         return shares
 
 
