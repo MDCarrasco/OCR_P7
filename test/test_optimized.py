@@ -46,7 +46,7 @@ class OptimizedTester(unittest.TestCase):
 
     """
     def test_optimized_simple(self):
-        self.wallet = Wallet('my_test_wallet', optimized=True, nb_available_shares=3)
+        self.wallet = Wallet(optimized=True, nb_available_shares=3)
         self.assertEqual(self.wallet.max_budget, 50000)
         available_shares = [
             Share("Share-1", "1", "1", cents=True),
@@ -54,7 +54,6 @@ class OptimizedTester(unittest.TestCase):
             Share("Share-3", "100", "1", cents=True)
         ]
         optimized(self.wallet, available_shares)
-        self.assertEqual(self.wallet.total_quantity_bought, 3)
         expected_folder = {
             "Share-1": 1,
             "Share-2": 10,
@@ -62,11 +61,10 @@ class OptimizedTester(unittest.TestCase):
         }
         self.assertEqual(self.wallet.folder, expected_folder)
         self.assertEqual(self.wallet.total_cost, 111)
-        self.assertEqual(self.wallet.current_budget, 389)
         self.assertEqual(self.wallet.total_profit, 1.11)
 
     def test_optimized_simple_float(self):
-        self.wallet = Wallet('my_test_wallet', optimized=True, nb_available_shares=3)
+        self.wallet = Wallet(optimized=True, nb_available_shares=3)
         self.assertEqual(self.wallet.max_budget, 50000)
         available_shares = [
             Share("Share-1", "0.5", "1.5", cents=True),
@@ -74,7 +72,6 @@ class OptimizedTester(unittest.TestCase):
             Share("Share-3", "100.3", "22", cents=True)
         ]
         optimized(self.wallet, available_shares)
-        self.assertEqual(self.wallet.total_quantity_bought, 3)
         expected_folder = {
             "Share-1": 0.5,
             "Share-2": 10.22,
@@ -82,11 +79,10 @@ class OptimizedTester(unittest.TestCase):
         }
         self.assertEqual(self.wallet.folder, expected_folder)
         self.assertEqual(self.wallet.total_cost, 111.02)
-        self.assertEqual(self.wallet.current_budget, 388.98)
         self.assertEqual(self.wallet.total_profit, 23.34)
 
     def test_optimized_complex_float(self):
-        self.wallet = Wallet('my_test_wallet', optimized=True, nb_available_shares=9)
+        self.wallet = Wallet(optimized=True, nb_available_shares=9)
         self.assertEqual(self.wallet.max_budget, 50000)
         available_shares = [
             Share("Share - DUPH", "100.01", "12.25", cents=True),
@@ -100,7 +96,6 @@ class OptimizedTester(unittest.TestCase):
             Share("Share - CTCR", "160.6", "12.4", cents=True)
         ]
         optimized(self.wallet, available_shares)
-        self.assertEqual(self.wallet.total_quantity_bought, 5)
 
         # Expected_folder values come from the output of utils/knapsack_solver_google.py
         # used with roundings of this test values (the scripts only accepts integers as input)
@@ -120,7 +115,6 @@ class OptimizedTester(unittest.TestCase):
 
         self.assertEqual(dict(self.wallet.folder), expected_folder)
         self.assertEqual(self.wallet.total_cost, 492.39)
-        self.assertEqual(self.wallet.current_budget, 7.61)
         self.assertEqual(self.wallet.total_profit, 98.35)
 
 

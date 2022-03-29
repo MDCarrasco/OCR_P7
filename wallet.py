@@ -42,7 +42,7 @@ __status__ = "Dev"
 class Wallet(object):
     """Wallet.
     """
-    def __init__(self, name, max_budget=500, optimized=False, nb_available_shares=None):
+    def __init__(self, max_budget=500, optimized=False, nb_available_shares=None):
         """Summary of __init__.
 
         Args:
@@ -51,22 +51,18 @@ class Wallet(object):
         """
         if optimized:
             assert nb_available_shares is not None
-        self.name                  = name
-        self.current_budget        = max_budget
+        self.optimized             = optimized
         self.max_budget            = max_budget if not optimized else max_budget * 100
-        self.total_quantity_bought = 0
         self.total_cost            = 0
         self.total_profit          = 0
         self.table                 = None if not optimized else self.__build_table(nb_available_shares)
         self.folder                = defaultdict(int)
-        self.optimized             = optimized
 
     def __build_table(self, nb_available_shares):
         return [[0 for _ in range(self.max_budget + 1)] for _ in range(nb_available_shares + 1)]
 
     def _buy_share(self, share_name, share_price, share_profit_amount):
         self.folder[share_name] = share_price
-        self.current_budget     = float(Decimal(str(self.current_budget)) - Decimal(str(share_price)))
         self.total_cost         = float(Decimal(str(self.total_cost)) + Decimal(str(share_price)))
         self.total_profit       = float(Decimal(str(self.total_profit)) + Decimal(str(share_profit_amount)))
 
@@ -75,7 +71,6 @@ class Wallet(object):
             self._buy_share(share.name, round(share.price / 100, 2), round(share.profit_amount / 100, 2))
         else:
             self._buy_share(share.name, share.price, share.profit_amount)
-        self.total_quantity_bought += 1
 
     def buy_single_shares(self, combination):
         assert sum(share.price for share in combination) <= self.max_budget

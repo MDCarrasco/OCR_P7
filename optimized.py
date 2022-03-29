@@ -94,7 +94,7 @@ if __name__ == "__main__":
     args = get_args()
     share_parser = SharesParser()
 
-    shares    = share_parser.get_shares_from_file(f"./data/{args.data}.csv", cents=True)
-    my_wallet = Wallet('my_wallet', optimized=True, nb_available_shares=len(shares))
-    optimized(my_wallet, shares)
-    print(my_wallet)
+    shares = share_parser.get_shares_from_file(f"./data/{args.data}.csv", cents=True)
+    wallet = Wallet(optimized=True, nb_available_shares=len(shares))
+    optimized(wallet, shares)
+    print(wallet)

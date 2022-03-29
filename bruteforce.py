@@ -68,7 +68,7 @@ if __name__ == "__main__":
     args = get_args()
     share_parser = SharesParser()
 
-    shares    = share_parser.get_shares_from_file(f"./data/{args.data}.csv")
-    my_wallet = Wallet('my_wallet')
-    bruteforce(my_wallet, shares)
-    print(my_wallet)
+    shares = share_parser.get_shares_from_file(f"./data/{args.data}.csv")
+    wallet = Wallet()
+    bruteforce(wallet, shares)
+    print(wallet)
